@@ -42,41 +42,41 @@ void Chain::insertBack(const Block & ndata){
  */
 void Chain::moveBack(int startPos, int len, int dist){
   /* your code here */
-  if(startPos+len-1+dist>length_){
-    dist = length_-startPos-len+1;
-  }
-  Node * before;
-  Node * after;
-  Node * left;
-  Node * right;
-  Node * first;
-  Node * last;
-  Node * curr = head_;
-  for(int i = 0; i < startPos+len-1+dist;i++){
-    switch (i) {
-      case startPos:
-        first = curr;
-        before = curr->prev;
-        break;
-      case startPos+len:
-        last = curr;
-        after = curr->next;
-        break;
-      case startPos+dist:
-        left = curr;
-        break;
-      case startPos+dist+len:
-        right = curr;
-        break;
+  if(dist!=0){
+    if(startPos+len-1+dist>length_){
+      dist = length_-startPos-len+1;
     }
-    curr = curr->next;
+    Node * before;
+    Node * after;
+    Node * left;
+    Node * right;
+    Node * first;
+    Node * last;
+    Node * curr = head_;
+    for(int i = 0; i < startPos+len-1+dist;i++){
+      switch (i) {
+        case startPos:
+          first = curr;
+          before = curr->prev;
+          break;
+        case startPos+len-1:
+          last = curr;
+          after = curr->next;
+          break;
+        case startPos+len-1+dist:
+          left = curr;
+          right = left->next;
+          break;
+      }
+      curr = curr->next;
+    }
+    before->next = after;
+    after->prev = next;
+    left->next = first;
+    first->prev = left;
+    last->next = right;
+    right->prev = last;
   }
-  before->next = after;
-  after->prev = next;
-  left->next = first;
-  first->prev = left;
-  last->next = right;
-  right->prev = last;
 }
 
 /**
