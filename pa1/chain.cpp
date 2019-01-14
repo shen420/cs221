@@ -19,6 +19,13 @@ Chain::~Chain(){
  */
 void Chain::insertBack(const Block & ndata){
   /* your code here */
+  Node * n = new Node(ndata);
+  Node * last = head_->prev;
+  Node * first = head_;
+  n->next = first;
+  n->prev = last;
+  last->next = n;
+  first->prev = n;
 }
 
 /**
@@ -31,7 +38,7 @@ void Chain::insertBack(const Block & ndata){
  * (startPos + dist + len - 1) of the resulting chain.
  * The order of subchain nodes is not changed in the move.
  * You may assume that: 1 <= startPos <= length - len + 1,
- * 0 <= dist <= length, and 0 <= len <= length. 
+ * 0 <= dist <= length, and 0 <= len <= length.
  */
 void Chain::moveBack(int startPos, int len, int dist){
   /* your code here */
@@ -56,6 +63,31 @@ void Chain::roll(int k){
  */
 void Chain::reverseSub(int pos1, int pos2){
   /* your code here */
+  Node * before;
+  Node * after;
+  Node * curr = head_;
+  for(int i = 0; i < pos2; i++){
+    if(i==pos-1){
+      before = curr;
+    }
+    curr = curr->next;
+  }
+  after = curr->next;
+  curr = before->next;
+  for(int i = 0; i <= pos2 - pos1; i++){
+    Node * aux = curr->next;
+    if(i==0){
+      curr->next = after;
+      curr->prev=aux;
+    }else if(i==pos2-pos1){
+      curr->next=curr->prev;
+      curr->prev=before;
+    }else{
+      curr->next=curr->prev;
+      curr->prev=aux;
+    }
+    curr = aux;
+  }
 }
 
 /*
@@ -74,6 +106,8 @@ void Chain::reverseSub(int pos1, int pos2){
 */
 void Chain::weave(Chain & other) { // leaves other empty.
   /* your code here */
+
+  }
 }
 
 
