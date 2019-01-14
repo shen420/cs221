@@ -118,8 +118,24 @@ void Chain::reverseSub(int pos1, int pos2){
 */
 void Chain::weave(Chain & other) { // leaves other empty.
   /* your code here */
-
-  }
+    if(other->height_!=height_||other->width_!=width_){
+      cout << "Block sizes differ." << endl;
+    }else{
+      Node * curr = head_->next;
+      while(other->head_->next!=other->head_){ //there is still nodes
+        Node * toInsert = other->head_->next;
+        Node * aux = curr->next;
+        toInsert->next = aux;
+        toInsert->prev = curr;
+        curr->next = toInsert;
+        aux->prev = toInsert;
+        if(curr->next->next==head_){
+          curr = curr->next;
+        }else{
+          curr = curr->next->next;
+        }
+      }
+    }
 }
 
 
