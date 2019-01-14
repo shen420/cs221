@@ -52,6 +52,18 @@ void Chain::moveBack(int startPos, int len, int dist){
  */
 void Chain::roll(int k){
   /* your code here */
+  Node * curr = head_;
+  for(int i = 0; i < length_-k+1; i++){
+    curr = curr->next;
+  }
+  Node * first = head_->next;
+  Node * last = head_->prev;
+  first->prev = last;
+  last->next = first;
+  head_->next = curr;
+  head_->prev = curr->prev;
+  head_->prev->next = head_;
+  curr->prev = head_;
 }
 
 /**
@@ -78,13 +90,13 @@ void Chain::reverseSub(int pos1, int pos2){
     Node * aux = curr->next;
     if(i==0){
       curr->next = after;
-      curr->prev=aux;
+      curr->prev = aux;
     }else if(i==pos2-pos1){
-      curr->next=curr->prev;
-      curr->prev=before;
+      curr->next = curr->prev;
+      curr->prev = before;
     }else{
-      curr->next=curr->prev;
-      curr->prev=aux;
+      curr->next = curr->prev;
+      curr->prev = aux;
     }
     curr = aux;
   }
