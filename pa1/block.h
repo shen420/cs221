@@ -20,8 +20,6 @@ public:
 
 private:
 
-  unsigned int width_;
-  unsigned int height_;
    vector< vector < HSLAPixel > > data;
 
 };

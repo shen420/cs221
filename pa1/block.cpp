@@ -3,8 +3,6 @@
 namespace cs221util{
 
 Block::build(PNG & im, int column, int width){
-  width_ = width;
-  height_ = im.height();
   for (unsigned x = column; x < column + width; x++) {
     vector < HSLAPixel > col;
     for (unsigned y = 0; y < im.height(); y++) {
@@ -15,27 +13,27 @@ Block::build(PNG & im, int column, int width){
 }
 
 Block::render(PNG & im, int column){
-  for(unsigned x = 0; x < width_; x++){
-    for(unsigned y = 0; y < height_; y++){
+  for(unsigned x = 0; x < width(); x++){
+    for(unsigned y = 0; y < height(); y++){
       im.getPixel(x+column, y) = data.at(x).at(y);
     }
   }
 }
 
 Block::greyscale(){
-  for (unsigned x = 0; x < width_; x++){
-    for (unsigned y = 0; y < height_; y++){
+  for (unsigned x = 0; x < width(); x++){
+    for (unsigned y = 0; y < height(); y++){
       data.at(x).at(y)->s=0;
     }
   }
 }
 
 Block::width(){
-  return width_;
+  return data.size();
 }
 
 Block::height(){
-  return height_;
+  return data.at(0).size();
 }
 
 }
