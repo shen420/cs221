@@ -9,6 +9,8 @@
  */
 Chain::~Chain(){
   /* your code here */
+  clear();
+  delete head_;
 }
 
 /**
@@ -21,11 +23,12 @@ void Chain::insertBack(const Block & ndata){
   /* your code here */
   Node * n = new Node(ndata);
   Node * last = head_->prev;
-  Node * first = head_;
-  n->next = first;
-  n->prev = last;
   last->next = n;
-  first->prev = n;
+  n->prev = last;
+  n->next = head_;
+  head_->prev = n;
+  length_++;
+  n->id = length_;
 }
 
 /**
@@ -42,41 +45,26 @@ void Chain::insertBack(const Block & ndata){
  */
 void Chain::moveBack(int startPos, int len, int dist){
   /* your code here */
-  if(dist!=0){
-    if(startPos+len-1+dist>length_){
-      dist = length_-startPos-len+1;
-    }
-    Node * before;
-    Node * after;
-    Node * left;
-    Node * right;
-    Node * first;
-    Node * last;
-    Node * curr = head_;
-    for(int i = 0; i < startPos+len-1+dist;i++){
-      switch (i) {
-        case startPos:
-          first = curr;
-          before = curr->prev;
-          break;
-        case startPos+len-1:
-          last = curr;
-          after = curr->next;
-          break;
-        case startPos+len-1+dist:
-          left = curr;
-          right = left->next;
-          break;
-      }
-      curr = curr->next;
-    }
-    before->next = after;
-    after->prev = next;
-    left->next = first;
-    first->prev = left;
-    last->next = right;
-    right->prev = last;
+  // Done
+  if(startPos + len - 1 + dist > length_){
+    dist = length_ - startPos - len - 1;
   }
+  if(dist>0 && len>0){
+    Node * firstSC = walk(head_, startPos);
+    Node * lastSC = walk(firstSC, len-1);
+    firstSC->prev->next = lastSC->next;
+    lastSC->next->prev = firstSC->prev;
+    Node * a = walk(lastSC, dist);
+    lastSC->next = a->next;
+    a->next->prev = lastSC;
+    a->next = firstSC;
+    firstSC->prev = a;
+  }
+  // Node * curr = head_->next;
+  // while(curr!=head_){
+  //   cout << curr->id << endl;
+  //   curr = curr->next;
+  // }
 }
 
 /**
@@ -87,18 +75,19 @@ void Chain::moveBack(int startPos, int len, int dist){
  */
 void Chain::roll(int k){
   /* your code here */
-  Node * curr = head_;
-  for(int i = 0; i < length_-k+1; i++){
-    curr = curr->next;
-  }
-  Node * first = head_->next;
-  Node * last = head_->prev;
-  first->prev = last;
-  last->next = first;
-  head_->next = curr;
-  head_->prev = curr->prev;
-  head_->prev->next = head_;
-  curr->prev = head_;
+  // Done
+  if(k % length_==0) return;
+  k = k % length_;
+  Node * a = head_->next;
+  Node * b = head_->prev;
+  Node * last = walk(head_, length_ - k);
+  Node * first = last->next;
+  first->prev = head_;
+  head_->next = first;
+  last->next = head_;
+  head_->prev = last;
+  a->prev = b;
+  b->next = a;
 }
 
 /**
@@ -110,31 +99,27 @@ void Chain::roll(int k){
  */
 void Chain::reverseSub(int pos1, int pos2){
   /* your code here */
-  Node * before;
-  Node * after;
-  Node * curr = head_;
-  for(int i = 0; i < pos2; i++){
-    if(i==pos-1){
-      before = curr;
-    }
-    curr = curr->next;
-  }
-  after = curr->next;
-  curr = before->next;
-  for(int i = 0; i <= pos2 - pos1; i++){
+  Node * p1 = walk(head_, pos1);
+  Node * p2 = walk(head_, pos2);
+  Node * bef = p1->prev;
+  Node * aft = p2->next;
+
+  Node * curr = p1;
+  while(curr!=p2){
     Node * aux = curr->next;
-    if(i==0){
-      curr->next = after;
-      curr->prev = aux;
-    }else if(i==pos2-pos1){
-      curr->next = curr->prev;
-      curr->prev = before;
-    }else{
-      curr->next = curr->prev;
-      curr->prev = aux;
-    }
+    curr->prev = curr->next;
     curr = aux;
   }
+  // curr == p2 at this point
+  curr = p1;
+  while(curr!=p2){
+    curr->prev->next = curr;
+    curr = curr->prev;
+  }
+  bef->next = p2;
+  p2->prev = bef;
+  aft->prev = p1;
+  p1->next = aft;
 }
 
 /*
@@ -153,24 +138,32 @@ void Chain::reverseSub(int pos1, int pos2){
 */
 void Chain::weave(Chain & other) { // leaves other empty.
   /* your code here */
-    if(other->height_!=height_||other->width_!=width_){
-      cout << "Block sizes differ." << endl;
-    }else{
-      Node * curr = head_->next;
-      while(other->head_->next!=other->head_){ //there is still nodes
-        Node * toInsert = other->head_->next;
-        Node * aux = curr->next;
-        toInsert->next = aux;
-        toInsert->prev = curr;
-        curr->next = toInsert;
-        aux->prev = toInsert;
-        if(curr->next->next==head_){
-          curr = curr->next;
-        }else{
-          curr = curr->next->next;
-        }
-      }
-    }
+  // if(other.height_!=height_ || other.width_!=width_){
+  //   cout << "Block sizes differ." << endl;
+  //   return;
+  // }
+  cout << length_ << " " << other.length_ << endl;
+  Node * curr = head_->next;
+  Node * h2 = other.head_;
+  while(other.length_>0){ // still nodes toInsert
+    length_++;
+    other.length_ -= 1;
+    Node * aux = curr->next;
+    Node * toInsert = h2->next;
+    curr->next = toInsert;
+    toInsert->next = aux;
+    aux->prev = toInsert;
+    toInsert->prev = curr;
+    curr = curr->next;
+    if(aux!=head_) curr = curr->next;
+  }
+  cout << length_ << " " << other.length_ << endl;
+
+    // Node * curr2 = head_;
+    // do{
+    //   cout << curr2->prev->id << " " << curr2->id << " " << curr2->next->id << endl;
+    //   curr2 = curr2->next;
+    // }while(curr2!=head_);
 }
 
 
@@ -181,6 +174,14 @@ void Chain::weave(Chain & other) { // leaves other empty.
  */
 void Chain::clear() {
   /* your code here */
+  while (!empty()) {
+    Node * f = head_->next;
+    Node * s = f->next;
+    s->prev = head_;
+    head_->next = s;
+    delete f;
+    length_--;
+  }
 }
 
 /**
@@ -192,4 +193,16 @@ void Chain::clear() {
  */
 void Chain::copy(Chain const& other) {
   /* your code here */
+  Node * curr = head_->next;
+  while(curr!=head_){
+    // other.length_++;
+    Node * h = other.head_;
+    Node * n = new Node(curr->data);
+    Node * last = h->prev;
+    last->next = n;
+    n->prev = last;
+    n->next = h;
+    h->prev = n;
+    n->id = other.length_;
+  }
 }

@@ -35,6 +35,7 @@ private:
       Node(); // default constructor--GIVEN
       Node(const Block & ndata); // data provided constructor--GIVEN
 
+      int id;
       Node * next; // ptr to next node in chain if one exists, NULL o/w
       Node * prev; // ptr to prev node in chain if one exists, NULL o/w
       const Block data; // data held by Node. const for this PA
@@ -147,7 +148,7 @@ public:
     * (startPos + dist + len - 1) of the resulting chain.
     * The order of subchain nodes is not changed in the move.
     * You may assume that: 1 <= startPos <= length - len + 1,
-    * 0 <= dist <= length, and 0 <= len <= length. 
+    * 0 <= dist <= length, and 0 <= len <= length.
     */
    void moveBack(int startPos, int len, int dist);
 
