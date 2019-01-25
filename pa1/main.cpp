@@ -69,6 +69,5 @@ PNG expected6; expected6.readFromFile("images/given-weaveSameSize.png");
 if (expected6 == result6) cout<< "weaveSameSize passed" << endl;
 PNG expected8; expected8.readFromFile("images/given-weaveRenderBack.png");
 if (expected8 == result8) cout<< "weaveRenderBack passed" << endl;
-    cout << __LINE__ << endl;
    return 0;
 }

@@ -35,7 +35,6 @@ private:
       Node(); // default constructor--GIVEN
       Node(const Block & ndata); // data provided constructor--GIVEN
 
-      int id;
       Node * next; // ptr to next node in chain if one exists, NULL o/w
       Node * prev; // ptr to prev node in chain if one exists, NULL o/w
       const Block data; // data held by Node. const for this PA
