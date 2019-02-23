@@ -1,7 +1,7 @@
 TESTSQ = testStackQueue
 TESTFILLS = testFills
 
-OBJS_FILLS_STUDENT = testFills.o borderColorPicker.o stripeColorPicker.o 
+OBJS_FILLS_STUDENT = testFills.o borderColorPicker.o stripeColorPicker.o customColorPicker.o
 OBJS_FILLS_PROVIDED = animation.o PNG.o HSLAPixel.o lodepng.o rainbowColorPicker.o 
 OBJS_SQ = testStackQueue.o
 

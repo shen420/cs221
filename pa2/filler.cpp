@@ -3,7 +3,7 @@
  * Implementation of functions in the filler namespace.
  *
  */
-//#include "filler.h"
+#include "filler.h"
 
 animation filler::fillStripeDFS(PNG& img, int x, int y, HSLAPixel fillColor,
                                 int stripeSpacing, double tolerance, int frameFreq)
@@ -11,7 +11,7 @@ animation filler::fillStripeDFS(PNG& img, int x, int y, HSLAPixel fillColor,
     /**
      * @todo Your code here!
      */
-     rainbowColorPicker a(fillColor, stripeSpacing);
+     stripeColorPicker a(fillColor, stripeSpacing);
      return fill<Stack>(img, x, y, a, tolerance, frameFreq);
 }
 
@@ -21,8 +21,9 @@ animation filler::fillBorderDFS(PNG& img, int x, int y,
     /**
      * @todo Your code here!
      */
-     // rainbowColorPicker a(borderColor, tolerance, );
-     return fill<Stack>(img, x, y, a, tolerance, frameFreq);
+    HSLAPixel center = *img.getPixel(x, y); 
+    borderColorPicker a(borderColor, img, tolerance, center);
+    return fill<Stack>(img, x, y, a, tolerance, frameFreq);
 }
 
 /* Given implementation of a DFS rainbow fill. */
@@ -39,7 +40,7 @@ animation filler::fillStripeBFS(PNG& img, int x, int y, HSLAPixel fillColor,
     /**
      * @todo Your code here!
      */
-     rainbowColorPicker a(fillColor, stripeSpacing);
+     stripeColorPicker a(fillColor, stripeSpacing);
      return fill<Queue>(img, x, y, a, tolerance, frameFreq);
 }
 
@@ -49,6 +50,9 @@ animation filler::fillBorderBFS(PNG& img, int x, int y,
     /**
      * @todo Your code here! You should replace the following line with a
      */
+    HSLAPixel center = *img.getPixel(x, y); 
+    borderColorPicker a(borderColor, img, tolerance, center); 
+    return fill<Queue>(img, x, y, a, tolerance, frameFreq); 
 }
 
 /* Given implementation of a BFS rainbow fill. */
@@ -132,36 +136,50 @@ animation filler::fill(PNG& img, int x, int y, colorPicker& fillColor,
      *        it will be the one we test against.
      */
      int count = 0;
+     animation animation; 
+
      // add frame
-     OrderingStructure<<int, int>> os;
+     animation.addFrame(img); 
+
+     OrderingStructure<pair<int, int>> os;
      set<pair<int, int>> visited;
-     pair<int, int> n = (x, y);
+     pair<int, int> n = make_pair(x, y);
      os.add(n);
      count++;
-     * img.getPixel(x, y) = fillColor.operator(x, y);
+     *img.getPixel(x, y) = fillColor(x, y); 
+     HSLAPixel center = *img.getPixel(x, y); 
+
      while(!os.isEmpty()){
        n = os.remove();
        vector<pair<int, int>> neighbors;
-       neighbors.add((n.first+1, n.second-1));
-       neighbors.add((n.first, n.second-1));
-       neighbors.add((n.first-1, n.second-1));
-       neighbors.add((n.first-1, n.second));
-       neighbors.add((n.first-1, n.second+1));
-       neighbors.add((n.first, n.second+1));
-       neighbors.add((n.first+1, n.second+1));
-       neighbors.add((n.first+1, n.second));
+       neighbors.push_back(make_pair(n.first+1, n.second-1));
+       neighbors.push_back(make_pair(n.first, n.second-1));
+       neighbors.push_back(make_pair(n.first-1, n.second-1));
+       neighbors.push_back(make_pair(n.first-1, n.second));
+       neighbors.push_back(make_pair(n.first-1, n.second+1));
+       neighbors.push_back(make_pair(n.first, n.second+1));
+       neighbors.push_back(make_pair(n.first+1, n.second+1));
+       neighbors.push_back(make_pair(n.first+1, n.second));
        for(int i = 0; i <= 7; i++){
          pair<int, int> c = neighbors.at(i);
-         if(!visited.contains(c)){ // check tolerance distance, no idea how to do it
-           * img.getPixel(c.first, c.second) = fillColor.operator(c.first, c.second);
-           os.add(c);
-           count++;
+         if(visited.count(c)>0){ 
+           // No '.contains' function in set...weird, using count instead 
+
+           // check tolerance distance (HSLAPixel class has a dist method that you can use to check tolerances)
+           if (img.getPixel(c.first, c.second)->dist(center) < tolerance) { 
+            (*img.getPixel(c.first, c.second)) = fillColor(c.first, c.second);
+            os.add(c);
+            count++;
+           }
            if(count%frameFreq == 0){
-             // add frame
+             animation.addFrame(img); 
            }
          }
        }
-       visited.add(n);
+       visited.insert(n);
      }
-     // add frame
+
+     // last frame 
+     animation.addFrame(img); 
+     return animation; 
 }

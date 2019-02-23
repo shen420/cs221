@@ -5,7 +5,7 @@ customColorPicker::customColorPicker()
 /* Your code here! */
 }
 
-HSLAPixel borderColorPicker::operator()(int x, int y)
+HSLAPixel customColorPicker::operator()(int x, int y)
 {
 
 /* Your code here! */
