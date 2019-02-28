@@ -1,6 +1,6 @@
 #include "customColorPicker.h"
 
-customColorPicker::customColorPicker()
+customColorPicker::customColorPicker(int test)
 {
 /* Your code here! */
 }

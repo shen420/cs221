@@ -181,6 +181,7 @@ TEST_CASE("fill::basic rainbow dfs","[weight=1][part=fill]"){
     REQUIRE(result==expected);
 
 }
+
 TEST_CASE("fill::basic rainbow bfs","[weight=1][part=fill]"){
 
     PNG img;
@@ -193,7 +194,23 @@ TEST_CASE("fill::basic rainbow bfs","[weight=1][part=fill]"){
     PNG result = anim.write("images/bfsrain.gif");
     result.writeToFile("images/bfsrain.png");
     PNG expected; expected.readFromFile("soln_images/bfsrain.png");
+
+    animation anim2; 
+    anim2 = filler::fillCustomDFS(img, RAINX, RAINY,
+                                         RAINTOLERANCE,
+                                         RAINFRAMEFREQ); 
+    PNG result2 = anim.write("images/dfscustom.gif"); 
+    result2.writeToFile("images/dfscustom.png"); 
+
+    animation anim3; 
+    anim3 = filler::fillCustomBFS(img, RAINX, RAINY,
+                                         RAINTOLERANCE,
+                                         RAINFRAMEFREQ);
+    PNG result3 = anim.write("images/bfscustom.gif"); 
+    result3.writeToFile("images/bfscustom.png"); 
+    
     REQUIRE(result==expected);
 
 }
+
 

@@ -13,7 +13,7 @@ class customColorPicker : public colorPicker
 {
   public:
 
-    customColorPicker();
+    customColorPicker(int test);
 
     virtual HSLAPixel operator()(int x, int y);
 };
