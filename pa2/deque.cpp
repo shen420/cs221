@@ -44,7 +44,10 @@ T Deque<T>::popL()
      */
      T res = data.at(k1);
      k1++;
-     if(k1>=k2-k1){
+
+     // check if empty block exists on the left which can fit the data on the right
+     // if so, resize
+     if(k1 >= k2 - k1){
        vector<T> nData;
        for(int i = k1; i<k2; i++){
          nData.emplace_back(data.at(i));

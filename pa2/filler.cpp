@@ -138,19 +138,23 @@ animation filler::fill(PNG& img, int x, int y, colorPicker& fillColor,
      int count = 0;
      animation animation; 
 
-     // add frame
+     // initial unaltered frame
      animation.addFrame(img); 
 
      OrderingStructure<pair<int, int>> os;
      set<pair<int, int>> visited;
      pair<int, int> n = make_pair(x, y);
+
      os.add(n);
      count++;
-     *img.getPixel(x, y) = fillColor(x, y); 
+
      HSLAPixel center = *img.getPixel(x, y); 
+     *img.getPixel(x, y) = fillColor(x, y); 
+
 
      while(!os.isEmpty()){
        n = os.remove();
+       visited.insert(n); 
        vector<pair<int, int>> neighbors;
        neighbors.push_back(make_pair(n.first+1, n.second-1));
        neighbors.push_back(make_pair(n.first, n.second-1));
@@ -160,26 +164,28 @@ animation filler::fill(PNG& img, int x, int y, colorPicker& fillColor,
        neighbors.push_back(make_pair(n.first, n.second+1));
        neighbors.push_back(make_pair(n.first+1, n.second+1));
        neighbors.push_back(make_pair(n.first+1, n.second));
+
        for(int i = 0; i <= 7; i++){
          pair<int, int> c = neighbors.at(i);
-         if(visited.count(c)>0){ 
-           // No '.contains' function in set...weird, using count instead 
-
-           // check tolerance distance (HSLAPixel class has a dist method that you can use to check tolerances)
-           if (img.getPixel(c.first, c.second)->dist(center) < tolerance) { 
-            (*img.getPixel(c.first, c.second)) = fillColor(c.first, c.second);
-            os.add(c);
-            count++;
+         if(visited.count(c) == 0){ 
+           // check tolerance distance to ensure valid point
+           if (img.getPixel(c.first, c.second)->dist(center) <= tolerance) {
+             // ensure pixel is in bounds 
+             if (c.first >= 0 && c.first <= (int)img.width()-1 && c.second >= 0 && c.second <= (int)img.height() -1) { 
+              os.add(c);
+              *img.getPixel(c.first, c.second) = fillColor(c.first, c.second);
+              count++;
+              visited.insert(c); 
+             } 
            }
            if(count%frameFreq == 0){
              animation.addFrame(img); 
            }
          }
        }
-       visited.insert(n);
      }
 
-     // last frame 
+     // last frame   
      animation.addFrame(img); 
      return animation; 
 }
