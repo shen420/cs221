@@ -1,0 +1,18 @@
+#include "customColorPicker.h"
+
+customColorPicker::customColorPicker(int test)
+{
+/* Your code here! */
+}
+
+HSLAPixel customColorPicker::operator()(int x, int y)
+{
+
+/* Your code here! */
+  HSLAPixel ret;
+  ret.h = ((x+y) % 360) * 4;
+  ret.s = 0.5;
+  ret.l = 0.5;
+  ret.a = 1.0;
+  return ret;
+}
