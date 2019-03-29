@@ -35,9 +35,9 @@ private:
     * The Node class is private to the tree class via the principle of
     * encapsulation---the end user does not need to know our node-based
     * implementation details.
-    * 
+    *
     * Assumes the current node is a 2^dim x 2^dim square whose upper left
-    * corner is 0,0, and whose bottom right corner (inclusive) is 
+    * corner is 0,0, and whose bottom right corner (inclusive) is
     * 2^dim-1,2^dim-1.
     */
    class Node {
@@ -45,18 +45,18 @@ private:
 
       Node(pair<int,int> ctr, int dim, HSLAPixel a);
 
-        pair<int,int> center; // optimal splitting position 
+        pair<int,int> center; // optimal splitting position
         int dimension; // node represents a square, 2^dim x 2^dim in size
         HSLAPixel avg; // average color over square
 
-      Node * NW; // left top child 
-      Node * NE; // right top child 
+      Node * NW; // left top child
+      Node * NE; // right top child
       Node * SE; // right bottom child
-      Node * SW; // left bottom child 
-      
+      Node * SW; // left bottom child
+
    };
-	
-   
+
+
 public:
 
    /* =============== start of given functions ====================*/
@@ -66,7 +66,7 @@ public:
     * Destroys all of the memory associated with the
     * current toqutree. This function should ensure that
     * memory does not leak on destruction of a toqutree.
-    * 
+    *
     * @see toqutree_given.cpp
     */
    ~toqutree();
@@ -83,7 +83,7 @@ public:
    toqutree(const toqutree & other);
 
    /**
-    * Overloaded assignment operator for toqutrees. 
+    * Overloaded assignment operator for toqutrees.
     * Part of the Big Three that we must define because the class
     * allocates dynamic memory. This depends on your implementation
     * of the copy and clear funtions.
@@ -100,16 +100,16 @@ public:
    /**
     * Constructor that builds a toqutree out of the given PNG.
     * Every leaf in the tree corresponds to a pixel in the PNG.
-    * Every non-leaf node corresponds to a square of pixels 
+    * Every non-leaf node corresponds to a square of pixels
     * which may not be contiguous in the original PNG, due to .
     * the splittingg procedure we've chosen. In addition, the Node
-    * stores a pixel representing the average color over the 
+    * stores a pixel representing the average color over the
     * portion of the image it represents.
     *
     * Every node's children correspond to a partition
     * of the node's square into four smaller squares where a square
     * is defined under the assumption that the image's horizontal
-    * and vertical borders "wrap" so that pixels at the top are 
+    * and vertical borders "wrap" so that pixels at the top are
     * considered to be adjacent to pixels at the bottom, and similarly
     * for the right and left edges of the image. The node's
     * square is partitioned by choosing a splitting point that
@@ -128,18 +128,18 @@ public:
    /**
     * Render returns a PNG image consisting of the pixels
     * stored in the tree. may be used on pruned trees. Draws
-    * every pixel onto a PNG canvas using the 
+    * every pixel onto a PNG canvas using the
     * average color stored in the node.
     */
    PNG render();
 
    /*
     *  Prune function trims subtrees as high as possible in the tree.
-    *  A subtree is pruned (cleared) if ALL of the subtree's leaves are within 
-    *  tol of the average color stored in the root of the subtree. 
-    *  Pruning criteria should be evaluated on the original tree, not 
+    *  A subtree is pruned (cleared) if ALL of the subtree's leaves are within
+    *  tol of the average color stored in the root of the subtree.
+    *  Pruning criteria should be evaluated on the original tree, not
     *  on any pruned subtree. (we only expect that trees would be pruned once.)
-    *  
+    *
    * You may want a recursive helper function for this one.
     */
    void prune(double tol);
@@ -188,6 +188,16 @@ private:
    * @param lr lower right point of current node's rectangle.
    */
    Node * buildTree(PNG * im, int k);
+
+   int sizeHelper(Node * root);
+
+   void clearHelper(Node * & curr);
+
+   Node * copyHelper(const Node * other);
+
+   PNG renderHelper(const Node * root);
+
+   void copyPixel(HSLAPixel * pixel, const HSLAPixel * other);
 
    /* =================== end of private PA3 functions ============== */
 };
