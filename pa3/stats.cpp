@@ -1,64 +1,75 @@
-
+#include <typeinfo>
+#include <iostream>
 #include "stats.h"
 
 stats::stats(PNG & im){
-
-/* your code here */
   // initialize 2D arrays to empty
-  for(int i = 0; i < im.width(); i++){
-    vector<double> colHueX (im.height());
-    vector<double> colHueY (im.height());
-    vector<double> colSat (im.height());
-    vector<double> colLum (im.height());
-    vector<vector<int>> colHist (im.height());
+  sumHueX.resize(im.height(), (vector<double>) im.width());
+  sumHueY.resize(im.height(), (vector<double>) im.width());
+  sumSat.resize(im.height(), (vector<double>) im.width());
+  sumLum.resize(im.height(), (vector<double>) im.width());
+  hist.resize(im.height(), vector< vector<int> > (im.width(), vector<int>(36)));
 
-    sumHueX.emplace_back(colHueX);
-    sumHueY.emplace_back(colHueY);
-    sumSat.emplace_back(colSat);
-    sumLum.emplace_back(colLum);
-    hist.emplace_back(colHist);
-  }
-
-  for(int i = 0; i < im.width(); i++){
-    for(int j = 0; j < im.height(); j++){
+  for(unsigned int i = 0; i < im.width(); i++){
+    for(unsigned int j = 0; j < im.height(); j++){
       HSLAPixel * pixel = im.getPixel((unsigned int)i, (unsigned int)j);
-      double hueX = pixel->s * cos(pixel->h);
-      double hueY = pixel->s * sin(pixel->h);
+      double hueX = pixel->s * cos(pixel->h*PI/180);
+      double hueY = pixel->s * sin(pixel->h*PI/180);
       double sat = pixel->s;
       double lum = pixel->l;
 
-      if(i != 0){
-        hueX += colHueX.at(i-1).at(j);
-        hueY += colHueY.at(i-1).at(j);
-        sat += colSat.at(i-1).at(j);
-        lum += colLum.at(i-1).at(j);
+
+      int bucket = pixel->h / 10;
+      if (bucket == 36) { 
+        bucket = 35; 
       }
-
-      if(j != 0){
-        hueX += colHueX.at(i).at(j-1);
-        hueY += colHueY.at(i).at(j-1);
-        sat += colSat.at(i).at(j-1);
-        lum += colLum.at(i).at(j-1);
-      }
-
-      colHueX[i][j] = hueX;
-      colHueY[i][j] = hueY;
-      colSat[i][j] = sat;
-      colLum[i][j] = lum;
-
-      vector<int> freqs (36);
-      if(i != 0){
-        for(int k = 0; k < 36; k++){
-          freqs[k] = hist.at(i-1).at(j)[k];
+      for (int k = 0; k < 36; k++) {
+        if (k == bucket) { 
+          hist.at(i).at(j).at(k) = 1; 
+        }
+        else { 
+          hist.at(i).at(j).at(k) = 0; 
         }
       }
-      for(int k = 0; k <= j; k++){
-        HSLAPixel * otherPixel = im.getPixel((unsigned int)i, (unsigned int)k);
-        int bin = otherPixel->h % 36;
-        freqs[bin]++;
+    
+      // case 1 - left edge
+      if (j > 0 && i==0) { 
+        hueX += sumHueX.at(i).at(j-1); 
+        hueY += sumHueY.at(i).at(j-1); 
+        sat += sumSat.at(i).at(j-1); 
+        lum += sumLum.at(i).at(j-1); 
+        // add to hist
+        for(int k = 0; k < 36; k++){
+          hist.at(i).at(j).at(k) += hist.at(i).at(j-1).at(k);
+        }
       }
-
-      hist[i][j] = freqs;
+      // case 2 - top edge
+      if(j==0 && i > 0){
+        hueX += sumHueX.at(i-1).at(j);
+        hueY += sumHueY.at(i-1).at(j);
+        sat += sumSat.at(i-1).at(j);
+        lum += sumLum.at(i-1).at(j);
+        // add to hist
+        for(int k = 0; k < 36; k++){
+          hist.at(i).at(j).at(k) += hist.at(i-1).at(j).at(k);
+        }
+      }
+      // case 3 - general 
+      if (j > 0 && i > 0) { 
+        hueX += sumHueX.at(i-1).at(j) + sumHueX.at(i).at(j-1) - sumHueX.at(i-1).at(j-1); 
+        hueY += sumHueY.at(i-1).at(j) + sumHueY.at(i).at(j-1) - sumHueY.at(i-1).at(j-1);
+        sat += sumSat.at(i-1).at(j) + sumSat.at(i).at(j-1) - sumSat.at(i-1).at(j-1);
+        lum += sumLum.at(i-1).at(j) + sumLum.at(i).at(j-1) - sumLum.at(i-1).at(j-1);
+        // add to hist 
+        for (int k = 0; k < 36; k++) { 
+          hist.at(i).at(j).at(k) += hist.at(i-1).at(j).at(k) + hist.at(i).at(j-1).at(k) - hist.at(i-1).at(j-1).at(k);
+        }
+      }
+      
+      sumHueX.at(i).at(j) = hueX;
+      sumHueY.at(i).at(j) = hueY;
+      sumSat.at(i).at(j) = sat;
+      sumLum.at(i).at(j) = lum;
     }
   }
 }
@@ -73,19 +84,19 @@ HSLAPixel stats::getAvg(pair<int,int> ul, pair<int,int> lr){
 
 /* your code here */
   double alpha = 1.0;
-  doube totalSat = sumSat[lr.first][lr.second];
+  double totalSat = sumSat[lr.first][lr.second];
   double totalLum = sumLum[lr.first][lr.second];
   double totalX = sumHueX[lr.first][lr.second];
   double totalY = sumHueY[lr.first][lr.second];
   long area = rectArea(ul, lr);
 
-  if(ul.second - 1 >= 0){
+  if(ul.second - 1 >= 0 && ul.first == 0){
     totalSat -= sumSat[lr.first][ul.second-1];
     totalLum -= sumLum[lr.first][ul.second-1];
     totalX -= sumHueX[lr.first][ul.second-1];
     totalY -= sumHueY[lr.first][ul.second-1];
   }
-  if(ul.first - 1 >= 0){
+  if(ul.first - 1 >= 0 && ul.second == 0){
     totalSat -= sumSat[ul.first-1][lr.second];
     totalLum -= sumLum[ul.first-1][lr.second];
     totalX -= sumHueX[ul.first-1][lr.second];
@@ -100,8 +111,10 @@ HSLAPixel stats::getAvg(pair<int,int> ul, pair<int,int> lr){
 
   double saturation = totalSat / area;
   double luminance = totalLum / area;
-  double hue = atan2(totalY/area, totalX/area) * 180 / PI; // piazza post
-
+  double hue = atan2(totalY, totalX) * 180 / PI; // piazza post
+  if (hue < 0) { 
+    hue += 2*PI; 
+  }
   return HSLAPixel (hue, saturation, luminance, alpha);
 }
 
@@ -151,6 +164,10 @@ double stats::entropy(vector<int> & distn,int area){
 
 double stats::entropy(pair<int,int> ul, pair<int,int> lr){
 
-/* your code here */
-  return entropy(buildHist(ul, lr), (int) rectArea(ul, lr));
+  /* your code here */
+  // cout << typeid(buildHist(ul, lr)).name() << endl; 
+  // cout << typeid((int)rectArea(ul, lr)).name() << endl; 
+  vector<int> histo = buildHist(ul, lr); 
+  int area = rectArea(ul, lr); 
+  return entropy(histo, area);
 }
