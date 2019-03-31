@@ -74,131 +74,68 @@ toqutree::Node * toqutree::buildTree(PNG * im, int k) {
 		HSLAPixel * pixel = new HSLAPixel(other->h, other->s, other->l, other->a);
 		res = new Node(ctr, k, * pixel);
 	}else{
-		pair<int, int> ctr = determineCenter(im, width);
-		stats * stats = new stats(* im);
+		PNG * helperIm = new PNG(width * 2, width * 2);
+		for(unsigned int i = 0; i < width; i++){
+			for(unsigned int j = 0; j < width; j++){
+				HSLAPixel * other = im->getPixel(i, j);
+				copyPixel(helperIm->getPixel(i, j), other);
+				copyPixel(helperIm->getPixel(i + width, j), other);
+				copyPixel(helperIm->getPixel(i, j + width), other);
+				copyPixel(helperIm->getPixel(i + width, j + width), other);
+			}
+		}
+		stats * stats = new stats(* helperIm);
 		HSLAPixel a = stats->getAvg(pair<int, int> (0,0), pair<int,int> ((int)width - 1, (int)width - 1));
+		pair<int, int> ctr = determineCenter(im, width, stats);
 		delete stats;
 		res = new Node(ctr, k, a);
 
 		PNG * se = new PNG(width / 2, width / 2);
-		for(unsigned int i = 0; i < width / 2; i++){
-		  for(unsigned int j = 0; j < width / 2; j++){
-		    unsigned int x = (res->center.first + i) % width;
-		    unsigned int y = (res->center.second + j) % width;
-		    HSLAPixel * pixel = se->getPixel(i, j);
-		    HSLAPixel * other = im->getPixel(x, y);
-		    copyPixel(pixel, other);
-		  }
-		}
-		res->SE = buildTree(se, k-1);
-
 		PNG * sw = new PNG(width / 2, width / 2);
-		for(unsigned int i = 0; i < width / 2; i++){
-		  for(unsigned int j = 0; j < width / 2; j++){
-		    unsigned int x = (res->center.first + i + width / 2) % width;
-		    unsigned int y = (res->center.second + j) % width;
-		    HSLAPixel * pixel = sw->getPixel(i, j);
-		    HSLAPixel * other = im->getPixel(x, y);
-		    copyPixel(pixel, other);
-		  }
-		}
-		res->SW = buildTree(sw, k-1);
-
 		PNG * ne = new PNG(width / 2, width / 2);
-		for(unsigned int i = 0; i < width / 2; i++){
-		  for(unsigned int j = 0; j < width / 2; j++){
-		    unsigned int x = (res->center.first + i) % width;
-		    unsigned int y = (res->center.second + j + width / 2) % width;
-		    HSLAPixel * pixel = ne->getPixel(i, j);
-		    HSLAPixel * other = im->getPixel(x, y);
-		    copyPixel(pixel, other);
-		  }
-		}
-		res->NE = buildTree(ne, k-1);
-
 		PNG * nw = new PNG(width / 2, width / 2);
 		for(unsigned int i = 0; i < width / 2; i++){
 		  for(unsigned int j = 0; j < width / 2; j++){
-		    unsigned int x = (res->center.first + i + width / 2) % width;
-		    unsigned int y = (res->center.second + j + width / 2) % width;
-		    HSLAPixel * pixel = ne->getPixel(i, j);
-		    HSLAPixel * other = im->getPixel(x, y);
-		    copyPixel(pixel, other);
-		  }
+				copyPixel(se->getPixel(i, j),
+			     				helperIm->getPixel(ctr.first + i, ctr.second + j));
+				copyPixel(sw->getPixel(i, j),
+									helperIm->getPixel(ctr.first + i + width / 2, ctr.second + j));
+				copyPixel(ne->getPixel(i, j),
+									helperIm->getPixel(ctr.first + i, ctr.second + j + width / 2));
+				copyPixel(nw->getPixel(i, j),
+									helperIm->getPixel(ctr.first + i + width / 2, ctr.second + j + width / 2));
+			}
 		}
-		res->NW = buildTree(nw, k-1);
+		delete helperIm;
+
+		res->SE = buildTree(se, k - 1);
+		res->SW = buildTree(sw, k - 1);
+		res->NE = buildTree(ne, k - 1);
+		res->NW = buildTree(nw, k - 1);
 	}
+
 	delete im;
 	return res;
 }
 
-pair<int, int> toqutree::determineCenter(PNG * im, unsigned int width){
+pair<int, int> toqutree::determineCenter(PNG * im, unsigned int width, stats * stats){
 	pair<int, int> res;
 	double min = INT_MAX;
+	// iterate through center square
 	for(unsigned int a = 0; a < width / 2; a++){
 		for(unsigned int b = 0; b < width / 2; b++){
-			auto c = a + width / 4;
-			auto d = b + width / 4;
-
 			double totalEntropy = 0;
-			pair<int, int> ul (0, 0);
-			pair<int, int> lr (width / 2 - 1, width / 2 - 1);
-
-			PNG * se = new PNG(width / 2, width / 2);
-			for(unsigned int i = 0; i < width / 2; i++){
-			  for(unsigned int j = 0; j < width / 2; j++){
-			    unsigned int x = (c + i) % width;
-			    unsigned int y = (d + j) % width;
-			    HSLAPixel * pixel = se->getPixel(i, j);
-			    HSLAPixel * other = im->getPixel(x, y);
-			    copyPixel(pixel, other);
-			  }
-			}
-			stats * se_stats = new stats(* se);
-			totalEntropy += se_stats->entropy(ul, lr);
-			delete se_stats;
-
-			PNG * sw = new PNG(width / 2, width / 2);
-			for(unsigned int i = 0; i < width / 2; i++){
-			  for(unsigned int j = 0; j < width / 2; j++){
-			    unsigned int x = (c + i + width / 2) % width;
-			    unsigned int y = (d + j) % width;
-			    HSLAPixel * pixel = sw->getPixel(i, j);
-			    HSLAPixel * other = im->getPixel(x, y);
-			    copyPixel(pixel, other);
-			  }
-			}
-			stats * sw_stats = new stats(* sw);
-			totalEntropy += sw_stats->entropy(ul, lr);
-			delete sw_stats;
-
-			PNG * ne = new PNG(width / 2, width / 2);
-			for(unsigned int i = 0; i < width / 2; i++){
-			  for(unsigned int j = 0; j < width / 2; j++){
-			    unsigned int x = (c + i) % width;
-			    unsigned int y = (d + j + width / 2) % width;
-			    HSLAPixel * pixel = ne->getPixel(i, j);
-			    HSLAPixel * other = im->getPixel(x, y);
-			    copyPixel(pixel, other);
-			  }
-			}
-			stats * ne_stats = new stats(* ne);
-			totalEntropy += ne_stats->entropy(ul, lr);
-			delete ne_stats;
-
-			PNG * nw = new PNG(width / 2, width / 2);
-			for(unsigned int i = 0; i < width / 2; i++){
-			  for(unsigned int j = 0; j < width / 2; j++){
-			    unsigned int x = (c + i + width / 2) % width;
-			    unsigned int y = (d + j + width / 2) % width;
-			    HSLAPixel * pixel = ne->getPixel(i, j);
-			    HSLAPixel * other = im->getPixel(x, y);
-			    copyPixel(pixel, other);
-			  }
-			}
-			stats * nw_stats = new stats(* nw);
-			totalEntropy += nw_stats->entropy(ul, lr);
-			delete nw_stats;
+			// entropy se
+			totalEntropy += stats->entropy(pair<int, int> (a + width /4, b + width / 4),
+																		pair<int, int> (a + width /4 + width / 2, b + width / 4 + width / 2));
+			// sw
+			totalEntropy += stats->entropy(pair<int, int> (a + width /4 + width / 2, b + width / 4),
+																		pair<int, int> (a + width /4 + width / 2 + width / 2, b + width / 4 + width / 2));
+			// ne
+			totalEntropy += stats->entropy(pair<int, int> (a + width /4, b + width / 4 + width / 2),
+																		pair<int, int> (a + width /4 + width / 2, b + width / 4 + width / 2 + width / 2));
+			totalEntropy += stats->entropy(pair<int, int> (a + width /4 + width / 2, b + width / 4 + width / 2),
+																		pair<int, int> (a + width /4 + width / 2 + width / 2, b + width / 4 + width / 2 + width / 2));
 
 			if(totalEntropy < min){
 				min = totalEntropy;
