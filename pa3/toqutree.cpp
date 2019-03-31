@@ -87,6 +87,11 @@ toqutree::Node * toqutree::buildTree(PNG * im, int k) {
 		stats * stats = new stats(* helperIm);
 		HSLAPixel a = stats->getAvg(pair<int, int> (0,0), pair<int,int> ((int)width - 1, (int)width - 1));
 		pair<int, int> ctr = determineCenter(im, width, stats);
+		// base case k = 1
+		if(k == 1){
+			ctr.first = 1;
+			ctr.second = 1;
+		}
 		delete stats;
 		res = new Node(ctr, k, a);
 
