@@ -97,7 +97,7 @@ HSLAPixel stats::getAvg(pair<int,int> ul, pair<int,int> lr){
   }
 
 
-	double hue = (atan2(hueY, hueX) * 180/PI);
+	double hue = (atan2(totalY/area, totalX/area) * 180/PI);
 	if (hue < 0) {
     hue += 360;
   }
