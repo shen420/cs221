@@ -38,7 +38,7 @@ toqutree::toqutree(PNG & imIn, int k){
 /* that imIn is large enough to contain an image of that size. */
 
 /* your code here */
-	root = buildTree(&imIn, k); 
+	root = buildTree(&imIn, k);
 }
 
 int toqutree::size() {
@@ -74,7 +74,7 @@ toqutree::Node * toqutree::buildTree(PNG * im, int k) {
 		HSLAPixel * other = im->getPixel(0,0);
 		HSLAPixel * pixel = new HSLAPixel(other->h, other->s, other->l, other->a);
 		res = new Node(ctr, k, * pixel);
-		// cout << "A" << endl; 
+		// cout << "A" << endl;
 	}else{
 		PNG * helperIm = new PNG(width * 2, width * 2);
 		for(unsigned int i = 0; i < width; i++){
@@ -100,7 +100,7 @@ toqutree::Node * toqutree::buildTree(PNG * im, int k) {
 		PNG * se = new PNG(width / 2, width / 2);
 		PNG * sw = new PNG(width / 2, width / 2);
 		PNG * ne = new PNG(width / 2, width / 2);
-		PNG * nw = new PNG(width / 2, width / 2);	
+		PNG * nw = new PNG(width / 2, width / 2);
 		for(unsigned int i = 0; i < width / 2; i++){
 		  for(unsigned int j = 0; j < width / 2; j++){
 				copyPixel(se->getPixel(i, j),
@@ -119,9 +119,9 @@ toqutree::Node * toqutree::buildTree(PNG * im, int k) {
 		res->SW = buildTree(sw, k - 1);
 		res->NE = buildTree(ne, k - 1);
 		res->NW = buildTree(nw, k - 1);
-		// cout << "B" << endl; 
+		// cout << "B" << endl;
 	}
-	// cout << "C" << endl; 
+	// cout << "C" << endl;
 	// delete im;
 	return res;
 }
@@ -281,7 +281,7 @@ void toqutree::clearHelper(Node * & curr){
 	clearHelper(curr->NE);
 	clearHelper(curr->SE);
 	clearHelper(curr->SW);
-	curr = NULL; 
+	curr = NULL;
 	delete curr;
 }
 
@@ -305,14 +305,14 @@ toqutree::Node * toqutree::copyHelper(const Node * other){
 
 void toqutree::printHelper(const Node * root){
 	if(root->NW == NULL){
-	cout << "leaf: ";  
-	cout << root->dimension << " " << root->avg.h << endl; 
+	cout << "leaf: ";
+	cout << root->dimension << " " << root->avg.h << endl;
 	return;
 	}
-	cout << "internal: ";  
-	cout << root->dimension << " " << root->avg.h << endl; 
-	printHelper(root->NW); 
-	printHelper(root->NE); 
-	printHelper(root->SW); 
+	cout << "internal: ";
+	cout << root->dimension << " " << root->avg.h << endl;
+	printHelper(root->NW);
+	printHelper(root->NE);
+	printHelper(root->SW);
 	printHelper(root->SE);
 }

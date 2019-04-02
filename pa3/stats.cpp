@@ -70,41 +70,41 @@ long stats::rectArea(pair<int,int> ul, pair<int,int> lr){
 HSLAPixel stats::getAvg(pair<int,int> ul, pair<int,int> lr){
 	HSLAPixel* ret = new HSLAPixel;
 
-	double hueX = 0.0;
-	double hueY = 0.0;
-	double sat = 0.0;
-	double lum = 0.0;
+	double alpha = 1.0;
+  double totalSat = sumSat[lr.first][lr.second];
+  double totalLum = sumLum[lr.first][lr.second];
+  double totalX = sumHueX[lr.first][lr.second];
+  double totalY = sumHueY[lr.first][lr.second];
+  long area = rectArea(ul, lr);
 
-	sat = sumSat[lr.first][lr.second];
-	lum = sumLum[lr.first][lr.second];
-	hueX = sumHueX[lr.first][lr.second];
-	hueY = sumHueY[lr.first][lr.second];
-
-	if (ul.first > 0){
-		sat -= sumSat[ul.first -1][lr.second];
-		lum -= sumLum[ul.first -1][lr.second];
-		hueX -= sumHueX[ul.first -1][lr.second];
-		hueY -= sumHueY[ul.first -1][lr.second];
-	}
-	if (ul.second > 0){
-		sat -= sumSat[lr.first][ul.second - 1];
-		lum -= sumLum[lr.first][ul.second - 1];
-		hueX -= sumHueX[lr.first][ul.second - 1];
-		hueY -= sumHueY[lr.first][ul.second - 1];
-	}
-	if (ul.first > 0 && ul.second > 0){
-		sat += sumSat[ul.first-1][ul.second-1];
-		lum += sumLum[ul.first-1][ul.second-1];
-		hueX += sumHueX[ul.first-1][ul.second-1];
-		hueY += sumHueY[ul.first-1][ul.second-1];
-	}
+	if(ul.second - 1 >= 0){
+    totalSat -= sumSat[lr.first][ul.second-1];
+    totalLum -= sumLum[lr.first][ul.second-1];
+    totalX -= sumHueX[lr.first][ul.second-1];
+    totalY -= sumHueY[lr.first][ul.second-1];
+  }
+	if(ul.first - 1 >= 0){
+    totalSat -= sumSat[ul.first-1][lr.second];
+    totalLum -= sumLum[ul.first-1][lr.second];
+    totalX -= sumHueX[ul.first-1][lr.second];
+    totalY -= sumHueY[ul.first-1][lr.second];
+  }
+	if(ul.first - 1 >= 0 && ul.second - 1 >= 0){
+    totalSat += sumSat[ul.first-1][ul.second-1];
+    totalLum += sumLum[ul.first-1][ul.second-1];
+    totalX += sumHueX[ul.first-1][ul.second-1];
+    totalY += sumHueY[ul.first-1][ul.second-1];
+  }
 
 
 	double hue = (atan2(hueY, hueX) * 180/PI);
-	(hue > 0) ? (ret->h = hue) : (ret->h = (hue + 360));
-	ret->s = sat/rectArea(ul,lr);
-	ret->l = lum/rectArea(ul,lr);
-	ret->a = 1.0;
+	if (hue < 0) {
+    hue += 360;
+  }
+	ret->h = hue;
+	ret->s = totalSat / area;
+	ret->l = totalLum / area;
+	ret->a = alpha;
 
 	return *ret;
 
