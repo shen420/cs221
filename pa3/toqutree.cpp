@@ -242,13 +242,11 @@ void toqutree::prune(double tol){
 }
 
 void toqutree::pruneHelper(Node * & curr, double tol){
-	
 	if(curr == NULL || curr->NW == NULL) return;
-
-	if(shouldPrune(tol, curr->NW, curr->avg.h)
-		&& shouldPrune(tol, curr->NE, curr->avg.h)
-		&& shouldPrune(tol, curr->SE, curr->avg.h)
-		&& shouldPrune(tol, curr->SW, curr->avg.h)){
+	if(shouldPrune(tol, curr->NW, curr->avg)
+		&& shouldPrune(tol, curr->NE, curr->avg)
+		&& shouldPrune(tol, curr->SE, curr->avg)
+		&& shouldPrune(tol, curr->SW, curr->avg)){
 		clear(curr->NW);
 		clear(curr->NE);
 		clear(curr->SE);
@@ -261,19 +259,14 @@ void toqutree::pruneHelper(Node * & curr, double tol){
 	pruneHelper(curr->SW, tol);
 }
 
-bool toqutree::shouldPrune(double tol, Node * & curr, double h){
-	bool res = false; 
-
+bool toqutree::shouldPrune(double tol, Node * & curr, HSLAPixel h){
 	if(curr->NW == NULL){
-		res = abs(curr->avg.h - h) <= tol;
+		return abs(curr->avg.dist(h)) <= tol;
 	}
-	else { 
-		res = shouldPrune(tol, curr->NW, h)
+	return shouldPrune(tol, curr->NW, h)
 	 				&& shouldPrune(tol, curr->NE, h)
 					&& shouldPrune(tol, curr->SE, h)
 					&& shouldPrune(tol, curr->SW, h);
-	}
-	return res; 
 }
 
 /* called by destructor and assignment operator*/

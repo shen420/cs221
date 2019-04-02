@@ -198,7 +198,7 @@ private:
 
    pair<int, int> determineCenter(PNG * im, unsigned int width, stats *stats); 
    void pruneHelper(Node * & curr, double tol);
-   bool shouldPrune(double tol, Node * & curr, double h);
+   bool shouldPrune(double tol, Node * & curr, HSLAPixel h);
    
    PNG renderHelper(const Node * root);
 
