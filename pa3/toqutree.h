@@ -148,6 +148,8 @@ public:
      * for debugging and testing.
      */
     int size();
+    void printHelper(const Node * root);
+    Node* root; // ptr to the root of the toqutree
 
    /* =============== end of public PA3 FUNCTIONS =========================*/
 
@@ -159,7 +161,6 @@ private:
     * You may add more if you need them.
     */
 
-   Node* root; // ptr to the root of the toqutree
 
 
    /* =================== private PA3 functions ============== */
@@ -195,6 +196,10 @@ private:
 
    Node * copyHelper(const Node * other);
 
+   pair<int, int> determineCenter(PNG * im, unsigned int width, stats *stats); 
+   void pruneHelper(Node * & curr, double tol);
+   bool shouldPrune(double tol, Node * & curr, double h);
+   
    PNG renderHelper(const Node * root);
 
    void copyPixel(HSLAPixel * pixel, const HSLAPixel * other);

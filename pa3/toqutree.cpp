@@ -38,6 +38,7 @@ toqutree::toqutree(PNG & imIn, int k){
 /* that imIn is large enough to contain an image of that size. */
 
 /* your code here */
+	root = buildTree(&imIn, k); 
 }
 
 int toqutree::size() {
@@ -70,9 +71,10 @@ toqutree::Node * toqutree::buildTree(PNG * im, int k) {
 	unsigned int width = (unsigned int) pow(2, k);
 	if(k==0){
 		pair<int, int> ctr (0,0);
-		HSLAPixel * other = im.getPixel(0,0);
+		HSLAPixel * other = im->getPixel(0,0);
 		HSLAPixel * pixel = new HSLAPixel(other->h, other->s, other->l, other->a);
 		res = new Node(ctr, k, * pixel);
+		// cout << "A" << endl; 
 	}else{
 		PNG * helperIm = new PNG(width * 2, width * 2);
 		for(unsigned int i = 0; i < width; i++){
@@ -84,7 +86,7 @@ toqutree::Node * toqutree::buildTree(PNG * im, int k) {
 				copyPixel(helperIm->getPixel(i + width, j + width), other);
 			}
 		}
-		stats * stats = new stats(* helperIm);
+		stats * stats = new class stats(* helperIm);
 		HSLAPixel a = stats->getAvg(pair<int, int> (0,0), pair<int,int> ((int)width - 1, (int)width - 1));
 		pair<int, int> ctr = determineCenter(im, width, stats);
 		// base case k = 1
@@ -98,7 +100,7 @@ toqutree::Node * toqutree::buildTree(PNG * im, int k) {
 		PNG * se = new PNG(width / 2, width / 2);
 		PNG * sw = new PNG(width / 2, width / 2);
 		PNG * ne = new PNG(width / 2, width / 2);
-		PNG * nw = new PNG(width / 2, width / 2);
+		PNG * nw = new PNG(width / 2, width / 2);	
 		for(unsigned int i = 0; i < width / 2; i++){
 		  for(unsigned int j = 0; j < width / 2; j++){
 				copyPixel(se->getPixel(i, j),
@@ -117,9 +119,10 @@ toqutree::Node * toqutree::buildTree(PNG * im, int k) {
 		res->SW = buildTree(sw, k - 1);
 		res->NE = buildTree(ne, k - 1);
 		res->NW = buildTree(nw, k - 1);
+		// cout << "B" << endl; 
 	}
-
-	delete im;
+	// cout << "C" << endl; 
+	// delete im;
 	return res;
 }
 
@@ -154,11 +157,11 @@ pair<int, int> toqutree::determineCenter(PNG * im, unsigned int width, stats * s
 
 PNG toqutree::render(){
 
-// My algorithm for this problem included a helper function
-// that was analogous to Find in a BST, but it navigated the
-// quadtree, instead.
+	// My algorithm for this problem included a helper function
+	// that was analogous to Find in a BST, but it navigated the
+	// quadtree, instead.
 
-/* your code here */
+	/* your code here */
 	return renderHelper(root);
 
 }
@@ -235,12 +238,13 @@ void toqutree::copyPixel(HSLAPixel * pixel, const HSLAPixel * other){
 /* oops, i left the implementation of this one in the file! */
 void toqutree::prune(double tol){
 
-	prune(root,tol);
-
+	pruneHelper(root,tol);
 }
 
 void toqutree::pruneHelper(Node * & curr, double tol){
+	
 	if(curr == NULL || curr->NW == NULL) return;
+
 	if(shouldPrune(tol, curr->NW, curr->avg.h)
 		&& shouldPrune(tol, curr->NE, curr->avg.h)
 		&& shouldPrune(tol, curr->SE, curr->avg.h)
@@ -257,14 +261,19 @@ void toqutree::pruneHelper(Node * & curr, double tol){
 	pruneHelper(curr->SW, tol);
 }
 
-boolean toqutree::shouldPrune(double tol, Node * & curr, double h){
+bool toqutree::shouldPrune(double tol, Node * & curr, double h){
+	bool res = false; 
+
 	if(curr->NW == NULL){
-		return abs(curr->avg.h - h) <= tol;
+		res = abs(curr->avg.h - h) <= tol;
 	}
-	return shouldPrune(tol, curr->NW, h)
+	else { 
+		res = shouldPrune(tol, curr->NW, h)
 	 				&& shouldPrune(tol, curr->NE, h)
 					&& shouldPrune(tol, curr->SE, h)
 					&& shouldPrune(tol, curr->SW, h);
+	}
+	return res; 
 }
 
 /* called by destructor and assignment operator*/
@@ -279,6 +288,7 @@ void toqutree::clearHelper(Node * & curr){
 	clearHelper(curr->NE);
 	clearHelper(curr->SE);
 	clearHelper(curr->SW);
+	curr = NULL; 
 	delete curr;
 }
 
@@ -298,4 +308,18 @@ toqutree::Node * toqutree::copyHelper(const Node * other){
 	res->SE = copyHelper(other->SE);
 	res->SW = copyHelper(other->SW);
 	return res;
+}
+
+void toqutree::printHelper(const Node * root){
+	if(root->NW == NULL){
+	cout << "leaf: ";  
+	cout << root->dimension << " " << root->avg.h << endl; 
+	return;
+	}
+	cout << "internal: ";  
+	cout << root->dimension << " " << root->avg.h << endl; 
+	printHelper(root->NW); 
+	printHelper(root->NE); 
+	printHelper(root->SW); 
+	printHelper(root->SE);
 }

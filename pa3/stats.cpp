@@ -23,8 +23,8 @@ stats::stats(PNG & im){
 
 			// left edge
 			if (i == 0 && j > 0){
-				sat += temp->s + sumSat[i][j-1];
-				lum += temp->l + sumLum[i][j-1];
+				sat += sumSat[i][j-1];
+				lum += sumLum[i][j-1];
 				hueX += sumHueX[i][j-1];
 				hueY += sumHueY[i][j-1];
 				for(int k = 0; k < 36; k++){
@@ -36,7 +36,7 @@ stats::stats(PNG & im){
 				sat += sumSat[i-1][j];
 				lum += sumLum[i-1][j];
 				hueX += sumHueX[i-1][j];
-				hueY[i][j] += sumHueY[i-1][j];
+				hueY += sumHueY[i-1][j];
 				for (int k = 0; k < 36; k++){
 					hist[i][j][k] = hist[i-1][j][k];
 				}
@@ -45,8 +45,8 @@ stats::stats(PNG & im){
 			if(j > 0 && i > 0){
 				sat += sumSat[i-1][j] + sumSat[i][j-1] - sumSat[i-1][j-1];
 				lum += sumLum[i-1][j] + sumLum[i][j-1] - sumLum[i-1][j-1];
-				hueX[i][j] += sumHueX[i-1][j] + sumHueX[i][j-1] - sumHueX[i-1][j-1]);
-				hueY[i][j] += sumHueY[i-1][j] + sumHueY[i][j-1] - sumHueY[i-1][j-1]);
+				hueX += sumHueX[i-1][j] + sumHueX[i][j-1] - sumHueX[i-1][j-1];
+				hueY += sumHueY[i-1][j] + sumHueY[i][j-1] - sumHueY[i-1][j-1];
 				for (int k = 0; k < 36; k++){
 					hist[i][j][k] = hist[i-1][j][k] + hist[i][j-1][k] - hist[i-1][j-1][k];
 				}
@@ -57,8 +57,8 @@ stats::stats(PNG & im){
 			sumHueX[i][j] = hueX;
 			sumHueY[i][j] = hueY;
 			sumLum[i][j] = lum;
+		}
 	}
-
 }
 
 long stats::rectArea(pair<int,int> ul, pair<int,int> lr){
