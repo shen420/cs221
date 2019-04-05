@@ -1,4 +1,3 @@
-
 /**
  *
  * toqutree (pa3)
@@ -75,7 +74,8 @@ toqutree::Node * toqutree::buildTree(PNG * im, int k) {
 		HSLAPixel * pixel = new HSLAPixel(other->h, other->s, other->l, other->a);
 		res = new Node(ctr, k, * pixel);
 		// cout << "A" << endl;
-	}else{
+	}
+	else {
 		PNG * helperIm = new PNG(width * 2, width * 2);
 		for(unsigned int i = 0; i < width; i++){
 			for(unsigned int j = 0; j < width; j++){
@@ -119,6 +119,10 @@ toqutree::Node * toqutree::buildTree(PNG * im, int k) {
 		res->SW = buildTree(sw, k - 1);
 		res->NE = buildTree(ne, k - 1);
 		res->NW = buildTree(nw, k - 1);
+		delete se; 
+		delete sw; 
+		delete ne; 
+		delete nw; 
 		// cout << "B" << endl;
 	}
 	// cout << "C" << endl;
